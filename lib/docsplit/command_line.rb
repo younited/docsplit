@@ -46,6 +46,7 @@ Options:
         when :repair  then Docsplit.repair_pages(ARGV, @options)
         when :text    then Docsplit.extract_text(ARGV, @options)
         when :pdf     then Docsplit.extract_pdf(ARGV, @options)
+        when :info    then Docsplit.extract_info(ARGV, @options).each {|metadata| puts "%s: %s" % metadata}
         else
           if METADATA_KEYS.include?(@command)
             value = Docsplit.send("extract_#{@command}", ARGV, @options)
