@@ -1,13 +1,21 @@
 # The Docsplit module delegates to the Java PDF extractors.
+require 'tmpdir'
+require 'fileutils'
+require 'shellwords'
+
 module Docsplit
 
   VERSION       = '0.6.3' # Keep in sync with gemspec.
 
   ROOT          = File.expand_path(File.dirname(__FILE__) + '/..')
 
-  CLASSPATH     = "#{ROOT}/build#{File::PATH_SEPARATOR}#{ROOT}/vendor/'*'"
+  ESCAPE        = lambda {|x| Shellwords.shellescape(x) }
 
-  LOGGING       = "-Djava.util.logging.config.file=#{ROOT}/vendor/logging.properties"
+  ROOT_E        = ROOT.map(&ESCAPE).join('')
+
+  CLASSPATH     = "#{ROOT_E}/build#{File::PATH_SEPARATOR}#{ROOT_E}/vendor/'*'"
+
+  LOGGING       = "-Djava.util.logging.config.file=#{ROOT_E}/vendor/logging.properties"
 
   HEADLESS      = "-Djava.awt.headless=true"
 
@@ -21,8 +29,6 @@ module Docsplit
   GM_FORMATS    = ["image/gif", "image/jpeg", "image/png", "image/x-ms-bmp", "image/svg+xml", "image/tiff", "image/x-portable-bitmap", "application/postscript", "image/x-portable-pixmap"]
 
   DEPENDENCIES  = {:java => false, :gm => false, :pdftotext => false, :pdftk => false, :tesseract => false}
-
-  ESCAPE        = lambda {|x| Shellwords.shellescape(x) }
 
   # Check for all dependencies, and note their absence.
   dirs = ENV['PATH'].split(File::PATH_SEPARATOR)
@@ -82,7 +88,7 @@ module Docsplit
       if GM_FORMATS.include?(`file -b --mime #{ESCAPE[doc]}`.strip.split(/[:;]\s+/)[0])
         `gm convert #{escaped_doc} #{escaped_out}/#{escaped_basename}.pdf`
       else
-        options = "-jar #{ROOT}/vendor/jodconverter/jodconverter-core-3.0-beta-4.jar -t #{timeout} -r #{ROOT}/vendor/conf/document-formats.js"
+        options = "-jar #{ROOT_E}/vendor/jodconverter/jodconverter-core-3.0-beta-4.jar -t #{timeout} -r #{ROOT_E}/vendor/conf/document-formats.js"
         run "#{options} #{escaped_doc} #{escaped_out}/#{escaped_basename}.pdf", [], {}
       end
     end
@@ -98,7 +104,7 @@ module Docsplit
       end
     EOS
   end
-  
+
   # Use the InfoExtractor to print out all the metadata
   def self.extract_info(pdfs, opts={})
     pdfs = ensure_pdfs(pdfs)
@@ -134,9 +140,6 @@ module Docsplit
 
 end
 
-require 'tmpdir'
-require 'fileutils'
-require 'shellwords'
 require "#{Docsplit::ROOT}/lib/docsplit/image_extractor"
 require "#{Docsplit::ROOT}/lib/docsplit/transparent_pdfs"
 require "#{Docsplit::ROOT}/lib/docsplit/text_extractor"
