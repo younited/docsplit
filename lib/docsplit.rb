@@ -16,7 +16,7 @@ module Docsplit
 
   OFFICE        = RUBY_PLATFORM.match(/darwin/i) ? '' : "-Doffice.home=#{office}"
 
-  METADATA_KEYS = [:author, :date, :creator, :keywords, :producer, :subject, :title, :length]
+  METADATA_KEYS = [:author, :date, :creator, :keywords, :producer, :subject, :title, :length, :encrypted, :file_size, :page_size, :tagged, :pdf_version, :optimized]
 
   GM_FORMATS    = ["image/gif", "image/jpeg", "image/png", "image/x-ms-bmp", "image/svg+xml", "image/tiff", "image/x-portable-bitmap", "application/postscript", "image/x-portable-pixmap"]
 
@@ -98,7 +98,7 @@ module Docsplit
       end
     EOS
   end
-  
+
   # Use the InfoExtractor to print out all the metadata
   def self.extract_info(pdfs, opts={})
     pdfs = ensure_pdfs(pdfs)
