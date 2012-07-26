@@ -11,15 +11,17 @@ module Docsplit
     # Extract a list of PDFs as rasterized page images, according to the
     # configuration in options.
     def extract(pdfs, options)
+      out_files = []
       @pdfs = [pdfs].flatten
       extract_options(options)
       @pdfs.each do |pdf|
         previous = nil
         @sizes.each_with_index do |size, i|
-          @formats.each {|format| convert(pdf, size, format, previous) }
+          @formats.each {|format| out_files += convert(pdf, size, format, previous) }
           previous = size if @rolling
         end
       end
+      out_files
     end
 
     # Convert a single PDF into page images at the specified size and format.
@@ -47,6 +49,7 @@ module Docsplit
           raise ExtractionFailed, result if $? != 0
         end
       end
+      return Dir.glob("#{directory}/#{basename}_[0-9]*.#{format}")
     ensure
       FileUtils.remove_entry_secure tempdir if File.exists?(tempdir)
     end
