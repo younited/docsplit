@@ -1,0 +1,759 @@
+diff --git a/LICENSE b/LICENSE
+index 38e96bf..76383ba 100755
+--- a/LICENSE
++++ b/LICENSE
+@@ -1,6 +1,7 @@
+ JODConverter ius licensed under the LGPL: gnu.org/licenses/lgpl.html
+ 
+-Copyright (c) 2009 Jeremy Ashkenas, DocumentCloud
++Copyright (c) 2009-2011 Jeremy Ashkenas, DocumentCloud
++Copyright (c) 2011-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ 
+ Permission is hereby granted, free of charge, to any person
+ obtaining a copy of this software and associated documentation
+diff --git a/Rakefile b/Rakefile
+index ce25d23..e6c5153 100755
+--- a/Rakefile
++++ b/Rakefile
+@@ -3,10 +3,8 @@ require 'rake/testtask'
+ 
+ desc 'Run all tests'
+ task :test do
+-  $LOAD_PATH.unshift(File.expand_path('test'))
+-  require 'redgreen' if Gem.available?('redgreen')
+   require 'test/unit'
+-  Dir['test/*/**/test_*.rb'].each {|test| require test }
++  Dir['./test/*/**/test_*.rb'].each {|test| require test }
+ end
+ 
+ namespace :gem do
+diff --git a/docsplit.gemspec b/docsplit.gemspec
+index b0475b8..97b06de 100755
+--- a/docsplit.gemspec
++++ b/docsplit.gemspec
+@@ -1,7 +1,7 @@
+ Gem::Specification.new do |s|
+   s.name      = 'docsplit'
+-  s.version   = '0.6.3'         # Keep version in sync with docsplit.rb
+-  s.date      = '2011-11-23'
++  s.version   = '0.7.4'         # Keep version in sync with docsplit.rb
++  s.date      = '2014-02-16'
+ 
+   s.homepage    = "http://documentcloud.github.com/docsplit/"
+   s.summary     = "Break Apart Documents into Images, Text, Pages and PDFs"
+@@ -13,8 +13,9 @@ Gem::Specification.new do |s|
+   EOS
+ 
+   s.authors           = ['Jeremy Ashkenas', 'Samuel Clay', 'Ted Han']
+-  s.email             = 'jeremy@documentcloud.org'
++  s.email             = 'opensource@documentcloud.org'
+   s.rubyforge_project = 'docsplit'
++  s.license           = 'MIT'
+ 
+   s.require_paths     = ['lib']
+   s.executables       = ['docsplit']
+diff --git a/index.html b/index.html
+index 9b12e73..bac19a0 100755
+--- a/index.html
++++ b/index.html
+@@ -98,7 +98,7 @@
+       (title, author, number of pages...)
+     </p>
+ 
+-    <p>Docsplit is currently at <a href="http://rubygems.org/gems/docsplit">version 0.6.0</a>.</p>
++    <p>Docsplit is currently at <a href="http://rubygems.org/gems/docsplit">version 0.7.2</a>.</p>
+ 
+     <p>
+       <i>Docsplit is an open-source component of <a href="http://documentcloud.org/">DocumentCloud</a>.</i>
+@@ -135,6 +135,11 @@
+         <tt>sudo port install poppler | brew install poppler</tt><br />
+       </li>
+       <li>
++        (Optional) Install <a href="http://www.ghostscript.com/">Ghostscript</a>:<br />
++        <tt>[aptitude | port | brew] install ghostscript</tt><br />
++        Ghostscript is required to convert PDF and Postscript files.
++      </li>
++      <li>
+         (Optional) Install <a href="http://code.google.com/p/tesseract-ocr/">Tesseract</a>:<br />
+         <tt>[aptitude | port | brew] install [tesseract | tesseract-ocr]</tt><br />
+         Without Tesseract installed, you'll still be able to extract text from
+@@ -144,15 +149,15 @@
+         (Optional) Install <a href="http://www.accesspdf.com/pdftk/">pdftk</a>.
+         On Linux, use <b>aptitude</b>, <b>apt-get</b> or <b>yum</b>:<br />
+         <tt>aptitude install pdftk</tt><br />
+-        On the Mac, you can <a href="http://fredericiana.com/2010/03/01/pdftk-1-41-for-mac-os-x-10-6/">download a recent installer</a> for the binary.
++        On the Mac, you can <a href="http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/">download a recent installer</a> for the binary.
+         Without <b>pdftk</b> installed, you can use Docsplit, but won't be able
+         to split apart a multi-page PDF into single-page PDFs.
+       </li>
+       <li>
+-        (Optional) Install <a href="http://www.openoffice.org/">OpenOffice</a>.
++        (Optional) Install <a href="http://www.libreoffice.org/">LibreOffice</a>.
+         On Linux, use <b>aptitude</b>, <b>apt-get</b> or <b>yum</b>:<br />
+-        <tt>aptitude install openoffice.org openoffice.org-java-common</tt><br />
+-        On the Mac, download and install <a href="http://download.openoffice.org/index.html">the latest release</a>.
++        <tt>aptitude install libreoffice</tt><br />
++        On the Mac, download and install <a href="http://www.libreoffice.org/download">the latest release</a>.
+       </li>
+     </ol>
+ 
+@@ -223,10 +228,10 @@ Docsplit.extract_pages('doc.pdf', :pages => 1..10)</pre>
+       <b class="header">pdf</b>
+       <span class="alias">Ruby: <b>extract_pdf</b></span>
+       <br />
+-      Convert documents into PDFs. Any type of document that OpenOffice can read
++      Convert documents into PDFs. Any type of document that LibreOffice can read
+       may be converted. These include the Microsoft Office formats: <b>doc</b>, <b>docx</b>, <b>ppt</b>,
+       <b>xls</b> and so on, as well as <b>html</b>, <b>odf</b>, <b>rtf</b>, <b>swf</b>, <b>svg</b>, and <b>wpd</b>.
+-      The first time that you convert a new file type, OpenOffice will lazy-load
++      The first time that you convert a new file type, LibreOffice will lazy-load
+       the code that processes it &mdash; subsequent conversions will be much faster.
+       <br/>You can use the <tt>--timeout</tt> flag to increase or decrease time before 'error on timeout' exception. 
+       Useful when you convert huge documents. Default timeout is 1 hour (more than enough to convert 1000-paged document).
+@@ -259,12 +264,12 @@ Docsplit.extract_length('path/to/stooges.pdf')
+       <a href="http://poppler.freedesktop.org/">Poppler</a>,
+       <a href="http://www.accesspdf.com/pdftk/">PDFTK</a>,
+       <a href="http://code.google.com/p/tesseract-ocr/">Tesseract</a>, and
+-      <a href="http://artofsolving.com/opensource/jodconverter">JODConverter</a>
+-      libraries. Poppler is used to extract text and metadata from PDF documents,
++      <a href="http://www.libreoffice.org/">LibreOffice</a> libraries. 
++      Poppler is used to extract text and metadata from PDF documents,
+       PDFTK is used to split them apart into pages, and GraphicsMagick is used to generate
+       the page images (internally, it's rendering them with
+       <a href="http://pages.cs.wisc.edu/~ghost/doc/GPL/index.htm">GhostScript</a>).
+-      JODConverter communicates with OpenOffice to perform the PDF conversions.
++      LibreOffice and GraphicsMagick convert documents and images to PDF.
+       Tesseract provides the transparent OCR fallback support, if the document
+       is a simple scan, and the file doesn't contain any embedded text.
+     </p>
+@@ -280,6 +285,26 @@ Docsplit.extract_length('path/to/stooges.pdf')
+     <h2 id="changes">Change Log</h2>
+     
+     <p>
++      <b class="header">0.7.2</b><small> &ndash; Feb. 23, 2013</small><br />
++      Bug fixes for LibreOffice support.
++    </p>
++    
++    <p>
++      <b class="header">0.7.0</b><small> &ndash; Feb. 23, 2013</small><br />
++      Docsplit now expresses a preference for LibreOffice over OpenOffice, with
++      an eye to removing JODConverter and OpenOffice support in future versions
++      (direct LibreOffice support is substantially faster than JODConverter).
++      Improved unicode support now correctly collects non-ascii characters from
++      pdfinfo.
++    </p>
++    
++    <p>
++      <b class="header">0.6.4</b><small> &ndash; Nov. 12, 2012</small><br />
++      Added a language flag for the Docsplit commandline, fixed several bugs,
++      and began preparations for the deprecation of pdftk.
++    </p>
++    
++    <p>
+       <b class="header">0.6.2</b><small> &ndash; Nov. 22, 2011</small><br />
+       Bugfix to escape document names during file type detection.
+     </p>
+diff --git a/lib/docsplit.rb b/lib/docsplit.rb
+index f92c91c..90fd500 100755
+--- a/lib/docsplit.rb
++++ b/lib/docsplit.rb
+@@ -1,34 +1,24 @@
+-# The Docsplit module delegates to the Java PDF extractors.
+ require 'tmpdir'
+ require 'fileutils'
+ require 'shellwords'
+ 
++# The Docsplit module delegates to the Java PDF extractors.
+ module Docsplit
+ 
+-  VERSION       = '0.6.3' # Keep in sync with gemspec.
+-
+-  ROOT          = File.expand_path(File.dirname(__FILE__) + '/..')
++  VERSION       = '0.7.4' # Keep in sync with gemspec.
+ 
+   ESCAPE        = lambda {|x| Shellwords.shellescape(x) }
+ 
+-  ROOT_E        = ROOT.map(&ESCAPE).join('')
+-
+-  CLASSPATH     = "#{ROOT_E}/build#{File::PATH_SEPARATOR}#{ROOT_E}/vendor/'*'"
+-
+-  LOGGING       = "-Djava.util.logging.config.file=#{ROOT_E}/vendor/logging.properties"
+-
+-  HEADLESS      = "-Djava.awt.headless=true"
+-
+-  office ||= "/usr/lib/openoffice" if File.exists? '/usr/lib/openoffice'
+-  office ||= "/usr/lib/libreoffice" if File.exists? '/usr/lib/libreoffice'
+-
+-  OFFICE        = RUBY_PLATFORM.match(/darwin/i) ? '' : "-Doffice.home=#{office}"
++  ROOT          = File.expand_path(File.dirname(__FILE__) + '/..')
++  ESCAPED_ROOT  = ESCAPE[ROOT]
+ 
+-  METADATA_KEYS = [:author, :date, :creator, :keywords, :producer, :subject, :title, :length]
++  METADATA_KEYS = [:author, :date, :creator, :keywords, :producer, :subject, :title, :length, :encrypted, :file_size, :page_size, :tagged, :pdf_version, :optimized]
+ 
+   GM_FORMATS    = ["image/gif", "image/jpeg", "image/png", "image/x-ms-bmp", "image/svg+xml", "image/tiff", "image/x-portable-bitmap", "application/postscript", "image/x-portable-pixmap"]
+ 
+-  DEPENDENCIES  = {:java => false, :gm => false, :pdftotext => false, :pdftk => false, :tesseract => false}
++  DEPENDENCIES  = {:java => false, :gm => false, :pdftotext => false, :pdftk => false, :pdftailor => false, :tesseract => false}
++
++  ESCAPE        = lambda {|x| Shellwords.shellescape(x) }
+ 
+   # Check for all dependencies, and note their absence.
+   dirs = ENV['PATH'].split(File::PATH_SEPARATOR)
+@@ -77,21 +67,7 @@ module Docsplit
+   # Use JODCConverter to extract the documents as PDFs.
+   # If the document is in an image format, use GraphicsMagick to extract the PDF.
+   def self.extract_pdf(docs, opts={})
+-    out = opts[:output] || '.'
+-    timeout = opts[:timeout] || 3600
+-    FileUtils.mkdir_p out unless File.exists?(out)
+-    [docs].flatten.each do |doc|
+-      ext = File.extname(doc)
+-      basename = File.basename(doc, ext)
+-      escaped_doc, escaped_out, escaped_basename = [doc, out, basename].map(&ESCAPE)
+-
+-      if GM_FORMATS.include?(`file -b --mime #{ESCAPE[doc]}`.strip.split(/[:;]\s+/)[0])
+-        `gm convert #{escaped_doc} #{escaped_out}/#{escaped_basename}.pdf`
+-      else
+-        options = "-jar #{ROOT_E}/vendor/jodconverter/jodconverter-core-3.0-beta-4.jar -t #{timeout} -r #{ROOT_E}/vendor/conf/document-formats.js"
+-        run "#{options} #{escaped_doc} #{escaped_out}/#{escaped_basename}.pdf", [], {}
+-      end
+-    end
++    PdfExtractor.new.extract(docs, opts)
+   end
+ 
+   # Define custom methods for each of the metadata keys that we support.
+@@ -111,39 +87,38 @@ module Docsplit
+     InfoExtractor.new.extract_all(pdfs, opts)
+   end
+ 
++  def self.extract_info(pdfs, opts={})
++    pdfs = ensure_pdfs(pdfs)
++    InfoExtractor.new.extract_all(pdfs, opts)
++  end
++
+   # Utility method to clean OCR'd text with garbage characters.
+   def self.clean_text(text)
+     TextCleaner.new.clean(text)
+   end
+ 
+-
+   private
+ 
+-  # Runs a Java command, with quieted logging, and the classpath set properly.
+-  def self.run(command, pdfs, opts, return_output=false)
+-    pdfs    = [pdfs].flatten.map{|pdf| "\"#{pdf}\""}.join(' ')
+-    cmd     = "java #{HEADLESS} #{LOGGING} #{OFFICE} -cp #{CLASSPATH} #{command} #{pdfs} 2>&1"
+-    result  = `#{cmd}`.chomp
+-    raise ExtractionFailed, result if $? != 0
+-    return return_output ? (result.empty? ? nil : result) : true
+-  end
+-
+   # Normalize a value in an options hash for the command line.
+   # Ranges look like: 1-10, Arrays like: 1,2,3.
+   def self.normalize_value(value)
+     case value
+-    when Range then normalize_range(value)
+-    when Array then value.map! {|v| v.is_a?(Range) ? normalize_range(v) : v }.join(',')
++    when Range then value.to_a.join(',')
++    when Array then value.map! {|v| v.is_a?(Range) ? normalize_value(v) : v }.join(',')
+     else            value.to_s
+     end
+   end
+ 
+ end
+ 
++require 'tmpdir'
++require 'fileutils'
++require 'shellwords'
+ require "#{Docsplit::ROOT}/lib/docsplit/image_extractor"
+ require "#{Docsplit::ROOT}/lib/docsplit/transparent_pdfs"
+ require "#{Docsplit::ROOT}/lib/docsplit/text_extractor"
+ require "#{Docsplit::ROOT}/lib/docsplit/page_extractor"
++require "#{Docsplit::ROOT}/lib/docsplit/pdf_extractor"
+ require "#{Docsplit::ROOT}/lib/docsplit/page_repair"
+ require "#{Docsplit::ROOT}/lib/docsplit/info_extractor"
+ require "#{Docsplit::ROOT}/lib/docsplit/text_cleaner"
+diff --git a/lib/docsplit/command_line.rb b/lib/docsplit/command_line.rb
+index 618a27c..b55c211 100755
+--- a/lib/docsplit/command_line.rb
++++ b/lib/docsplit/command_line.rb
+@@ -96,6 +96,9 @@ Options:
+         opts.on('--no-clean', 'disable cleaning of OCR\'d text') do |c|
+           @options[:clean] = false
+         end
++        opts.on('-l', '--language [LANGUAGE]', 'set the language (ISO 639-2/T code) for text extraction') do |l|
++          @options[:language] = l
++          @options[:clean] = false
+         opts.on('-t', '--timeout [SEC]', 'Timeout for PDF extraction from OpenOffice document format (default is 1 hour)') do |t|
+           @options[:timeout] = t
+         end
+@@ -121,4 +124,4 @@ Options:
+ 
+   end
+ 
+-end
+\ No newline at end of file
++end
+diff --git a/lib/docsplit/image_extractor.rb b/lib/docsplit/image_extractor.rb
+index a3afa8b..fc60b6c 100755
+--- a/lib/docsplit/image_extractor.rb
++++ b/lib/docsplit/image_extractor.rb
+@@ -11,15 +11,17 @@ module Docsplit
+     # Extract a list of PDFs as rasterized page images, according to the
+     # configuration in options.
+     def extract(pdfs, options)
++      out_files = []
+       @pdfs = [pdfs].flatten
+       extract_options(options)
+       @pdfs.each do |pdf|
+         previous = nil
+         @sizes.each_with_index do |size, i|
+-          @formats.each {|format| convert(pdf, size, format, previous) }
++          @formats.each {|format| out_files += convert(pdf, size, format, previous) }
+           previous = size if @rolling
+         end
+       end
++      out_files
+     end
+ 
+     # Convert a single PDF into page images at the specified size and format.
+@@ -42,11 +44,12 @@ module Docsplit
+       else
+         page_list(pages).each do |page|
+           out_file  = ESCAPE[File.join(directory, "#{basename}_#{page}.#{format}")]
+-          cmd = "MAGICK_TMPDIR=#{tempdir} OMP_NUM_THREADS=2 gm convert +adjoin #{common} #{escaped_pdf}[#{page - 1}] #{out_file} 2>&1".chomp
++          cmd = "MAGICK_TMPDIR=#{tempdir} OMP_NUM_THREADS=2 gm convert +adjoin -define pdf:use-cropbox=true #{common} #{escaped_pdf}[#{page - 1}] #{out_file} 2>&1".chomp
+           result = `#{cmd}`.chomp
+           raise ExtractionFailed, result if $? != 0
+         end
+       end
++      return Dir.glob("#{directory}/#{basename}_[0-9]*.#{format}")
+     ensure
+       FileUtils.remove_entry_secure tempdir if File.exists?(tempdir)
+     end
+diff --git a/lib/docsplit/info_extractor.rb b/lib/docsplit/info_extractor.rb
+index be135b8..3810c39 100644
+--- a/lib/docsplit/info_extractor.rb
++++ b/lib/docsplit/info_extractor.rb
+@@ -7,36 +7,60 @@ module Docsplit
+ 
+     # Regex matchers for different bits of information.
+     MATCHERS = {
+-      :author   => /^Author:\s+([^\n]+)/,
+-      :date     => /^CreationDate:\s+([^\n]+)/,
+-      :creator  => /^Creator:\s+([^\n]+)/,
+-      :keywords => /^Keywords:\s+([^\n]+)/,
+-      :producer => /^Producer:\s+([^\n]+)/,
+-      :subject  => /^Subject:\s+([^\n]+)/,
+-      :title    => /^Title:\s+([^\n]+)/,
+-      :length   => /^Pages:\s+([^\n]+)/,
++      :author       => /^Author:\s+([^\n]+)/,
++      :date         => /^CreationDate:\s+([^\n]+)/,
++      :creator      => /^Creator:\s+([^\n]+)/,
++      :keywords     => /^Keywords:\s+([^\n]+)/,
++      :producer     => /^Producer:\s+([^\n]+)/,
++      :subject      => /^Subject:\s+([^\n]+)/,
++      :title        => /^Title:\s+([^\n]+)/,
++      :length       => /^Pages:\s+([^\n]+)/,
++      :encrypted    => /^Encrypted:\s+([^\n]+)/,
++      :file_size    => /^File size:\s+([^\n]+)/,
++      :page_size    => /^Page size:\s+([^\n]+)/,
++      :tagged       => /^Tagged:\s+([^\n]+)/,
++      :pdf_version  => /^PDF version:\s+([^\n]+)/,
++      :optimized    => /^Optimized:\s+([^\n]+)/
+     }
+ 
+     # Pull out a single datum from a pdf.
+     def extract(key, pdfs, opts)
++      extract_all(pdfs, opts)[key]
++    end
++    
++    def extract_all(pdfs, opts)
+       pdf = [pdfs].flatten.first
+       cmd = "pdfinfo #{ESCAPE[pdf]} 2>&1"
+       # Remove non-ASCII characters as the matcher chokes on them
+       result = Iconv.conv('ASCII//IGNORE', 'UTF8', `#{cmd}`.chomp)
+       raise ExtractionFailed, result if $? != 0
+-      match = result.match(MATCHERS[key])
+-      answer = match && match[1]
+-      answer = answer.to_i if answer && key == :length
+-      answer
++      # ruby  1.8 (iconv) and 1.9 (String#encode) :
++      if String.method_defined?(:encode)
++        result.encode!('UTF-8', 'binary', :invalid => :replace, :undef => :replace, :replace => "") unless result.valid_encoding?
++      else
++        require 'iconv' unless defined?(Iconv)
++        ic = Iconv.new('UTF-8//IGNORE','UTF-8')
++        result = ic.iconv(result)
++      end
++      info = {}
++      MATCHERS.each do |key, matcher|
++        match = result.match(matcher)
++        answer = match && match[1]
++        if answer
++          answer = answer.to_i if key == :length
++          info[key] = answer
++        end
++      end
++      info
+     end
+-    
++
+     # Pull all supported datums from a pdf.
+     def extract_all(pdfs, opts)
+       pdf = [pdfs].flatten.first
+       cmd = "pdfinfo #{ESCAPE[pdf]} 2>&1"
+       result = `#{cmd}`.chomp
+       raise ExtractionFailed, result if $? != 0
+-      
++
+       answers = {}
+       MATCHERS.each do |key, pattern|
+         match = result.match(pattern)
+diff --git a/lib/docsplit/page_extractor.rb b/lib/docsplit/page_extractor.rb
+index 3e8051e..1b9bf7f 100644
+--- a/lib/docsplit/page_extractor.rb
++++ b/lib/docsplit/page_extractor.rb
+@@ -11,7 +11,12 @@ module Docsplit
+         pdf_name = File.basename(pdf, File.extname(pdf))
+         page_path = File.join(@output, "#{pdf_name}_%d.pdf")
+         FileUtils.mkdir_p @output unless File.exists?(@output)
+-        cmd = "pdftk #{ESCAPE[pdf]} burst output #{ESCAPE[page_path]} 2>&1"
++        
++        cmd = if DEPENDENCIES[:pdftailor] # prefer pdftailor, but keep pdftk for backwards compatability
++          "pdftailor unstitch --output #{ESCAPE[page_path]} #{ESCAPE[pdf]} 2>&1"
++        else
++          "pdftk #{ESCAPE[pdf]} burst output #{ESCAPE[page_path]} 2>&1"
++        end
+         result = `#{cmd}`.chomp
+         FileUtils.rm('doc_data.txt') if File.exists?('doc_data.txt')
+         raise ExtractionFailed, result if $? != 0
+diff --git a/lib/docsplit/pdf_extractor.rb b/lib/docsplit/pdf_extractor.rb
+new file mode 100644
+index 0000000..12069c7
+--- /dev/null
++++ b/lib/docsplit/pdf_extractor.rb
+@@ -0,0 +1,162 @@
++require 'rbconfig'
++
++module Docsplit
++  class PdfExtractor
++    @@executable     = nil
++    @@version_string = nil
++
++    # Provide a set of helper functions to determine the OS.
++    HOST_OS = (defined?("RbConfig") ? RbConfig : Config)::CONFIG['host_os']
++    def windows?
++      !!HOST_OS.match(/mswin|windows|cygwin/i)
++    end
++    def osx?
++      !!HOST_OS.match(/darwin/i)
++    end
++    def linux?
++      !!HOST_OS.match(/linux/i)
++    end
++    
++    # The first line of the help output holds the name and version number
++    # of the office software to be used for extraction.
++    def version_string
++      unless @@version_string
++        null = windows? ? "NUL" : "/dev/null"
++        @@version_string = `#{office_executable} -h 2>#{null}`.split("\n").first
++        if !!@@version_string.match(/[0-9]*/)
++          @@version_string = `#{office_executable} --version`.split("\n").first
++        end
++      end
++      @@version_string
++    end
++    def libre_office?
++      !!version_string.match(/^LibreOffice/)
++    end
++    def open_office?
++      !!version_string.match(/^OpenOffice.org/)
++    end
++    
++    # A set of default locations to search for office software
++    # These have been extracted from JODConverter.  Each listed
++    # path should contain a directory "program" which in turn 
++    # contains the "soffice" executable.
++    # see: https://github.com/mirkonasato/jodconverter/blob/master/jodconverter-core/src/main/java/org/artofsolving/jodconverter/office/OfficeUtils.java#L63-L91
++    def office_search_paths
++      if windows?
++        office_names       = ["LibreOffice 3", "LibreOffice 4", "OpenOffice.org 3"]
++        program_files_path = ENV["CommonProgramFiles"]
++        search_paths       = office_names.map{ |program| File.join(program_files_path, program) }
++      elsif osx?
++        search_paths = %w(
++          /Applications/LibreOffice.app/Contents
++          /Applications/OpenOffice.org.app/Contents
++        )
++      else # probably linux/unix
++        # heroku libreoffice buildpack: https://github.com/rishihahs/heroku-buildpack-libreoffice
++        search_paths = %w(
++          /usr/lib/libreoffice
++          /usr/lib64/libreoffice
++          /opt/libreoffice
++          /usr/lib/openoffice
++          /usr/lib64/openoffice
++          /opt/openoffice.org3
++          /app/vendor/libreoffice
++        )
++      end
++      search_paths
++    end
++    
++    # Identify the path to a working office executable.
++    def office_executable
++      paths = office_search_paths
++
++      # If an OFFICE_PATH has been specified on the commandline
++      # raise an error if that path isn't valid, otherwise, add
++      # it to the front of our search paths.
++      if ENV['OFFICE_PATH']
++        raise ArgumentError, "No such file or directory #{ENV['OFFICE_PATH']}" unless File.exists? ENV['OFFICE_PATH']
++        paths.unshift(ENV['OFFICE_PATH'])
++      end
++      
++      # The location of the office executable is OS dependent
++      path_pieces = ["soffice"]
++      if windows?
++        path_pieces += [["program", "soffice.bin"]]
++      elsif osx?
++        path_pieces += [["MacOS", "soffice"], ["Contents", "MacOS", "soffice"]]
++      else
++        path_pieces += [["program", "soffice"]]
++      end
++      
++      # Search for the first suitable office executable
++      # and short circuit an executable is found.
++      paths.each do |path|
++        if File.exists? path
++          @@executable ||= path unless File.directory? path
++          path_pieces.each do |pieces|
++            check_path = File.join(path, pieces)
++            @@executable ||= check_path if File.exists? check_path
++          end
++        end
++        break if @@executable
++      end
++      raise OfficeNotFound, "No office software found" unless @@executable
++      @@executable
++    end
++    
++    # Used to specify the office location for JODConverter
++    def office_path
++      File.dirname(File.dirname(office_executable))
++    end
++    
++    # Convert documents to PDF.
++    def extract(docs, opts)
++      out = opts[:output] || '.'
++      FileUtils.mkdir_p out unless File.exists?(out)
++      [docs].flatten.each do |doc|
++        ext = File.extname(doc)
++        basename = File.basename(doc, ext)
++        escaped_doc, escaped_out, escaped_basename = [doc, out, basename].map(&ESCAPE)
++
++        if GM_FORMATS.include?(`file -b --mime #{ESCAPE[doc]}`.strip.split(/[:;]\s+/)[0])
++          `gm convert #{escaped_doc} #{escaped_out}/#{escaped_basename}.pdf`
++        else
++          if libre_office?
++            # Set the LibreOffice user profile, so that parallel uses of cloudcrowd don't trip over each other.
++            ENV['SYSUSERCONFIG']="file://#{File.expand_path(escaped_out)}"
++            
++            options = "--headless --invisible  --norestore --nolockcheck --convert-to pdf --outdir #{escaped_out} #{escaped_doc}"
++            cmd = "#{office_executable} #{options} 2>&1"
++            result = `#{cmd}`.chomp
++            raise ExtractionFailed, result if $? != 0
++            true
++          else # open office presumably, rely on JODConverter to figure it out.
++            options = "-jar #{ESCAPED_ROOT}/vendor/jodconverter/jodconverter-core-3.0-beta-4.jar -r #{ESCAPED_ROOT}/vendor/conf/document-formats.js"
++            run_jod "#{options} #{escaped_doc} #{escaped_out}/#{escaped_basename}.pdf", [], {}
++          end
++        end
++      end
++    end
++
++    CLASSPATH     = "#{ESCAPED_ROOT}/build#{File::PATH_SEPARATOR}#{ESCAPED_ROOT}/vendor/'*'"
++
++    LOGGING       = "-Djava.util.logging.config.file=#{ESCAPED_ROOT}/vendor/logging.properties"
++
++    HEADLESS      = "-Djava.awt.headless=true"
++    
++    private
++    
++    # Runs a Java command, with quieted logging, and the classpath set properly.
++    def run_jod(command, pdfs, opts, return_output=false)
++
++      pdfs   = [pdfs].flatten.map{|pdf| "\"#{pdf}\""}.join(' ')
++      office = osx? ? "-Doffice.home=#{office_path}" : office_path
++      cmd    = "java #{HEADLESS} #{LOGGING} #{office} -cp #{CLASSPATH} #{command} #{pdfs} 2>&1"
++      result = `#{cmd}`.chomp
++      raise ExtractionFailed, result if $? != 0
++      return return_output ? (result.empty? ? nil : result) : true
++    end
++
++    class OfficeNotFound < StandardError; end
++  end
++end
+diff --git a/lib/docsplit/text_cleaner.rb b/lib/docsplit/text_cleaner.rb
+index 123f74a..c4aac01 100644
+--- a/lib/docsplit/text_cleaner.rb
++++ b/lib/docsplit/text_cleaner.rb
+@@ -35,8 +35,13 @@ module Docsplit
+     # For the time being, `clean` uses the regular StringScanner, and not the
+     # multibyte-aware version, coercing to ASCII first.
+     def clean(text)
+-      require 'iconv' unless defined?(Iconv)
+-      text    = Iconv.iconv('ascii//translit//ignore', 'utf-8', text).first
++      if String.method_defined?(:encode)
++        text.encode!('ascii', :invalid => :replace, :undef => :replace, :replace => '?')
++      else
++        require 'iconv' unless defined?(Iconv)
++        text = Iconv.iconv('ascii//translit//ignore', 'utf-8', text).first
++      end
++
+       scanner = StringScanner.new(text)
+       cleaned = []
+       spaced  = false
+diff --git a/lib/docsplit/text_extractor.rb b/lib/docsplit/text_extractor.rb
+index 0d55f32..a8842dc 100644
+--- a/lib/docsplit/text_extractor.rb
++++ b/lib/docsplit/text_extractor.rb
+@@ -31,7 +31,7 @@ module Docsplit
+       FileUtils.mkdir_p @output unless File.exists?(@output)
+       [pdfs].flatten.each do |pdf|
+         @pdf_name = File.basename(pdf, File.extname(pdf))
+-        pages = (@pages == 'all') ? 1..Docsplit.extract_length(pdf) : @pages
++        pages = @pages == 'all' ? nil : @pages #with pages = nil, docsplit uses extract_full to extract the whole document
+         if @force_ocr || (!@forbid_ocr && !contains_text?(pdf))
+           extract_from_ocr(pdf, pages)
+         else
+diff --git a/lib/docsplit/transparent_pdfs.rb b/lib/docsplit/transparent_pdfs.rb
+index cd0969f..3094047 100755
+--- a/lib/docsplit/transparent_pdfs.rb
++++ b/lib/docsplit/transparent_pdfs.rb
+@@ -9,12 +9,20 @@ module Docsplit
+     def ensure_pdfs(docs)
+       [docs].flatten.map do |doc|
+         ext = File.extname(doc)
+-        if ext.downcase == '.pdf'
++        if ext.downcase == '.pdf' || File.open(doc, &:readline) =~ /\A\%PDF-\d+(\.\d+)?$/
+           doc
+-        else
+-          tempdir = File.join(Dir.tmpdir, 'docsplit')
+-          extract_pdf([doc], {:output => tempdir})
+-          File.join(tempdir, File.basename(doc, ext) + '.pdf')
++        else 
++          #this test is nested because it's relatively expensive, no need to do it for files with pdf extensions
++          filetypeHeader = File.open(doc, 'r') { |f| f.read(4)}
++          is_pdf = (filetypeHeader =~ /\%PDF/) == 0 
++          #via http://stackoverflow.com/questions/7919674/how-to-verify-downloaded-file-format
++          if is_pdf
++            doc
++          else
++            tempdir = File.join(Dir.tmpdir, 'docsplit')
++            extract_pdf([doc], {:output => tempdir})
++            File.join(tempdir, File.basename(doc, ext) + '.pdf')
++          end
+         end
+       end
+     end
+@@ -23,4 +31,4 @@ module Docsplit
+ 
+   extend TransparentPDFs
+ 
+-end
+\ No newline at end of file
++end
+diff --git a/test/fixtures/Faktura 10.pdf b/test/fixtures/Faktura 10.pdf
+new file mode 100644
+index 0000000..8f65aa7
+Binary files /dev/null and b/test/fixtures/Faktura 10.pdf differ
+diff --git a/test/fixtures/unicode.pdf b/test/fixtures/unicode.pdf
+index 5302e7b..02e7f1b 100644
+Binary files a/test/fixtures/unicode.pdf and b/test/fixtures/unicode.pdf differ
+diff --git a/test/test_helper.rb b/test/test_helper.rb
+index 96fff79..598e1bb 100755
+--- a/test/test_helper.rb
++++ b/test/test_helper.rb
+@@ -1,5 +1,7 @@
+-require 'lib/docsplit'
++here = File.dirname(__FILE__)
++require File.join(here, '..', 'lib', 'docsplit')
+ require 'fileutils'
++require 'test/unit'
+ 
+ class Test::Unit::TestCase
+   include Docsplit
+diff --git a/test/unit/test_convert_to_pdf.rb b/test/unit/test_convert_to_pdf.rb
+index 2fb17ba..a8c1d0b 100755
+--- a/test/unit/test_convert_to_pdf.rb
++++ b/test/unit/test_convert_to_pdf.rb
+@@ -1,4 +1,5 @@
+-require 'test_helper'
++here = File.expand_path(File.dirname(__FILE__))
++require File.join(here, '..', 'test_helper')
+ 
+ class ConvertToPdfTest < Test::Unit::TestCase
+ 
+diff --git a/test/unit/test_extract_images.rb b/test/unit/test_extract_images.rb
+index 08c0b52..8ccfc58 100755
+--- a/test/unit/test_extract_images.rb
++++ b/test/unit/test_extract_images.rb
+@@ -1,4 +1,5 @@
+-require 'test_helper'
++here = File.expand_path(File.dirname(__FILE__))
++require File.join(here, '..', 'test_helper')
+ 
+ class ExtractImagesTest < Test::Unit::TestCase
+ 
+diff --git a/test/unit/test_extract_info.rb b/test/unit/test_extract_info.rb
+index cfcaa53..5c59fa0 100755
+--- a/test/unit/test_extract_info.rb
++++ b/test/unit/test_extract_info.rb
+@@ -1,4 +1,5 @@
+-require 'test_helper'
++here = File.expand_path(File.dirname(__FILE__))
++require File.join(here, '..', 'test_helper')
+ 
+ class ExtractInfoTest < Test::Unit::TestCase
+ 
+@@ -35,7 +36,13 @@ class ExtractInfoTest < Test::Unit::TestCase
+   def test_name_escaping_while_extracting_info
+     assert 2 == Docsplit.extract_length('test/fixtures/PDF file with spaces \'single\' and "double quotes".pdf')
+   end
+-  
++
++  def test_malformed_unicode
++    assert_nothing_raised do
++      Docsplit.extract_date('test/fixtures/Faktura 10.pdf')
++    end
++  end
++
+   def test_extract_all
+     metadata = Docsplit.extract_info('test/fixtures/obama_arts.pdf')
+     assert metadata[:author] == "mkommareddi"
+diff --git a/test/unit/test_extract_pages.rb b/test/unit/test_extract_pages.rb
+index bdb8518..6996358 100755
+--- a/test/unit/test_extract_pages.rb
++++ b/test/unit/test_extract_pages.rb
+@@ -1,4 +1,5 @@
+-require 'test_helper'
++here = File.expand_path(File.dirname(__FILE__))
++require File.join(here, '..', 'test_helper')
+ 
+ class ExtractPagesTest < Test::Unit::TestCase
+ 
+diff --git a/test/unit/test_extract_text.rb b/test/unit/test_extract_text.rb
+index 69ccb5a..00d24e3 100755
+--- a/test/unit/test_extract_text.rb
++++ b/test/unit/test_extract_text.rb
+@@ -1,4 +1,5 @@
+-require 'test_helper'
++here = File.expand_path(File.dirname(__FILE__))
++require File.join(here, '..', 'test_helper')
+ require 'tmpdir'
+ 
+ class ExtractTextTest < Test::Unit::TestCase

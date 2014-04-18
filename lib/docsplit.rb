@@ -12,11 +12,11 @@ module Docsplit
   ROOT          = File.expand_path(File.dirname(__FILE__) + '/..')
   ESCAPED_ROOT  = ESCAPE[ROOT]
 
-  METADATA_KEYS = [:author, :date, :creator, :keywords, :producer, :subject, :title, :length]
-  
+  METADATA_KEYS = [:author, :date, :creator, :keywords, :producer, :subject, :title, :length, :encrypted, :file_size, :page_size, :tagged, :pdf_version, :optimized]
+
   GM_FORMATS    = ["image/gif", "image/jpeg", "image/png", "image/x-ms-bmp", "image/svg+xml", "image/tiff", "image/x-portable-bitmap", "application/postscript", "image/x-portable-pixmap"]
 
-  DEPENDENCIES  = {:java => false, :gm => false, :pdftotext => false, :pdftk => false, :pdftailor => false, :tesseract => false}
+  DEPENDENCIES  = {:java => false, :gm => false, :pdftotext => false, :pdftk => false, :pdftailor => false, :tesseract => false, :pdftailor => false}
 
   # Check for all dependencies, and note their absence.
   dirs = ENV['PATH'].split(File::PATH_SEPARATOR)
@@ -68,7 +68,7 @@ module Docsplit
       end
     EOS
   end
-  
+
   def self.extract_info(pdfs, opts={})
     pdfs = ensure_pdfs(pdfs)
     InfoExtractor.new.extract_all(pdfs, opts)

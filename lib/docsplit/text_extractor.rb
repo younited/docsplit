@@ -31,7 +31,7 @@ module Docsplit
       FileUtils.mkdir_p @output unless File.exists?(@output)
       [pdfs].flatten.each do |pdf|
         @pdf_name = File.basename(pdf, File.extname(pdf))
-        pages = (@pages == 'all') ? 1..Docsplit.extract_length(pdf) : @pages
+        pages = @pages == 'all' ? nil : @pages #with pages = nil, docsplit uses extract_full to extract the whole document
         if @force_ocr || (!@forbid_ocr && !contains_text?(pdf))
           extract_from_ocr(pdf, pages)
         else
