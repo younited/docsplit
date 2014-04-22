@@ -9,7 +9,7 @@ module Docsplit
     def ensure_pdfs(docs)
       [docs].flatten.map do |doc|
         ext = File.extname(doc)
-        if ext.downcase == '.pdf' || File.open(doc, &:readline) =~ /\A\%PDF-\d+(\.\d+)?$/
+        if ext.downcase == '.pdf'
           doc
         else
           #this test is nested because it's relatively expensive, no need to do it for files with pdf extensions
