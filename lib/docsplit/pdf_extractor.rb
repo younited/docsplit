@@ -150,7 +150,7 @@ module Docsplit
     def run_jod(command, pdfs, opts, return_output=false)
 
       pdfs   = [pdfs].flatten.map{|pdf| "\"#{pdf}\""}.join(' ')
-      office = osx? ? office_path : "-Doffice.home=#{office_path}"
+      office = "-Doffice.home=#{office_path}"
       cmd    = "java #{HEADLESS} #{LOGGING} #{office} -cp #{CLASSPATH} #{command} #{pdfs} 2>&1"
       result = `#{cmd}`.chomp
       raise ExtractionFailed, result if $? != 0
