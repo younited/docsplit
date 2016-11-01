@@ -5,14 +5,6 @@ module Docsplit
 
     # Regex matchers for different bits of information.
     MATCHERS = {
-      :author   => /^Author:\s+([^\n]+)/,
-      :date     => /^CreationDate:\s+([^\n]+)/,
-      :creator  => /^Creator:\s+([^\n]+)/,
-      :keywords => /^Keywords:\s+([^\n]+)/,
-      :producer => /^Producer:\s+([^\n]+)/,
-      :subject  => /^Subject:\s+([^\n]+)/,
-      :title    => /^Title:\s+([^\n]+)/,
-      :length   => /^Pages:\s+([^\n]+)/,
       :author       => /^Author:\s+([^\n]+)/,
       :date         => /^CreationDate:\s+([^\n]+)/,
       :creator      => /^Creator:\s+([^\n]+)/,
