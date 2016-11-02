@@ -16,7 +16,7 @@ module Docsplit
 
   GM_FORMATS    = ["image/gif", "image/jpeg", "image/png", "image/x-ms-bmp", "image/svg+xml", "image/tiff", "image/x-portable-bitmap", "application/postscript", "image/x-portable-pixmap"]
 
-  DEPENDENCIES  = {:java => false, :gm => false, :pdftotext => false, :pdftk => false, :pdftailor => false, :tesseract => false, :pdftailor => false}
+  DEPENDENCIES  = {:java => false, :gm => false, :pdftotext => false, :pdftk => false, :pdftailor => false, :tesseract => false}
 
   # Check for all dependencies, and note their absence.
   dirs = ENV['PATH'].split(File::PATH_SEPARATOR)
